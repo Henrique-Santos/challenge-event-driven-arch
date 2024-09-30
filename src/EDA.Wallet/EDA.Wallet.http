@@ -1,0 +1,25 @@
+POST http://localhost:3004/clients HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@j.com"
+}
+
+###
+
+GET http://localhost:3004/accounts/e4f44483-5672-4c38-8246-e8f1a5e754d0 HTTP/1.1
+Accept: application/json
+
+###
+
+POST http://localhost:3004/transactions HTTP/1.1
+Content-Type: application/json
+
+{
+  "accountIdFrom": "e4f44483-5672-4c38-8246-e8f1a5e754d0",
+  "accountIdTo": "514daa34-bc0a-4303-b473-5f78b5f9685f",
+  "amount": 1
+}
+
+###

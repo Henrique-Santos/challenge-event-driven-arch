@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  eda-balance:
+    build:
+      context: ../src
+      dockerfile: EDA.Balance/Dockerfile
+    ports:
+      - "3003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__SqlServer=Server=sqlserver,1435;Database=ChallengeEDA;User Id=sa;Password=r0ot@msSQL;Encrypt=True;TrustServerCertificate=True;
+      - Kafka__BootstrapServers=kafka:9092
+    depends_on:
+      - sqlserver
+      - kafka
+
+  eda-wallet:
+    build:
+      context: ../src
+      dockerfile: EDA.Wallet/Dockerfile
+    ports:
+      - "3004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__SqlServer=Server=sqlserver,1435;Database=ChallengeEDA;User Id=sa;Password=r0ot@msSQL;Encrypt=True;TrustServerCertificate=True;
+      - Kafka__BootstrapServers=kafka:9092
+    depends_on:
+      - sqlserver
+      - kafka
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "r0ot@msSQL"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1435:1433"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.2.1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    depends_on:
+      - kafka
+    ports:
+      - 19000:9000
+    environment:
+      KAFKA_BROKERCONNECT: kafka:9092
